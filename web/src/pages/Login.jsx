@@ -127,24 +127,6 @@ export default function Login() {
             Forgot password?
           </Link>
         </div>
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <p className="text-xs text-gray-500 text-center mb-2">Test accounts:</p>
-          <div className="grid grid-cols-3 gap-2 text-xs">
-            <div className="bg-gray-50 p-2 rounded text-center">
-              <div className="font-medium text-gray-700">Admin</div>
-              <div className="text-gray-500">admin@iscms.com</div>
-            </div>
-            <div className="bg-gray-50 p-2 rounded text-center">
-              <div className="font-medium text-gray-700">Teacher</div>
-              <div className="text-gray-500">teacher@iscms.com</div>
-            </div>
-            <div className="bg-gray-50 p-2 rounded text-center">
-              <div className="font-medium text-gray-700">Student</div>
-              <div className="text-gray-500">student@iscms.com</div>
-            </div>
-          </div>
-          <p className="text-xs text-gray-400 text-center mt-2">Password: 123456</p>
-        </div>
       </div>
     </div>
   );
