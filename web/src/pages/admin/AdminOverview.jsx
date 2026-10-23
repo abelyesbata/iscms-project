@@ -20,30 +20,53 @@ export default function AdminOverview() {
     load();
   }, []);
 
-  if (loading) return <div className="text-center py-12 text-gray-500">Loading...</div>;
+  if (loading) {
+    return <div className="text-center py-12 text-gray-500">Loading...</div>;
+  }
 
   return (
-    <>
+    <div>
+      {/* First Row of Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Total Users" value={stats?.users.total} color="bg-blue-500" />
-        <StatCard title="Students" value={stats?.users.students} color="bg-green-500" />
-        <StatCard title="Teachers" value={stats?.users.teachers} color="bg-purple-500" />
-        <StatCard title="Classes" value={stats?.academics.classes} color="bg-orange-500" />
+        <StatCard title="Total Users" value={stats?.users?.total} color="bg-blue-500" />
+        <StatCard title="Students" value={stats?.users?.students} color="bg-green-500" />
+        <StatCard title="Teachers" value={stats?.users?.teachers} color="bg-purple-500" />
+        <StatCard title="Classes" value={stats?.academics?.classes} color="bg-orange-500" />
       </div>
+
+      {/* Second Row of Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Attendance" value={stats?.academics.attendanceRecords} color="bg-indigo-500" />
-        <StatCard title="Marks" value={stats?.academics.marksEntered} color="bg-pink-500" />
-        <StatCard title="Resources" value={stats?.academics.resourcesUploaded} color="bg-teal-500" />
-        <StatCard title="Fees Collected" value={`${stats?.finance.totalCollected || 0} Birr`} color="bg-emerald-500" />
+        <StatCard title="Attendance" value={stats?.academics?.attendanceRecords} color="bg-indigo-500" />
+        <StatCard title="Marks" value={stats?.academics?.marksEntered} color="bg-pink-500" />
+        <StatCard title="Resources" value={stats?.academics?.resourcesUploaded} color="bg-teal-500" />
+        <StatCard title="Fees Collected" value={`${stats?.finance?.totalCollected || 0} Birr`} color="bg-emerald-500" />
       </div>
+
+      {/* Responsive Image Section */}
+      <div className="mb-6 bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="flex justify-center p-4">
+          <img
+            src="/wachemo-school.jpg"
+            alt="Wachemo School Campus"
+            className="w-auto h-auto max-h-64 max-w-full object-contain"
+          />
+        </div>
+        <div className="p-4 pt-0 text-center border-t border-gray-100">
+          <p className="text-gray-700 font-medium">Wachemo Community Excellency School</p>
+        </div>
+      </div>
+
+      {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h2 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <QuickAction to="/admin/users" label="Manage Users" icon="👥" />
           <QuickAction to="/admin/classes" label="Manage Classes" icon="🏫" />
+          <QuickAction to="/admin/reports" label="View Reports" icon="📊" />
+          <QuickAction to="/admin/announcements" label="Announcements" icon="📢" />
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
