@@ -21,70 +21,139 @@ export default function AdminOverview() {
   }, []);
 
   if (loading) {
-    return <div className="text-center py-12 text-gray-500">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      {/* First Row of Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Total Users" value={stats?.users?.total} color="bg-blue-500" />
-        <StatCard title="Students" value={stats?.users?.students} color="bg-green-500" />
-        <StatCard title="Teachers" value={stats?.users?.teachers} color="bg-purple-500" />
-        <StatCard title="Classes" value={stats?.academics?.classes} color="bg-orange-500" />
+    <div className="space-y-6">
+      {/* 1. የስታቲስቲክስ ካርዶች (Cards with Hover Effects) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <StatCard 
+          title="Total Users" 
+          value={stats?.users?.total} 
+          icon="👥" 
+          color="bg-blue-500" 
+          hoverColor="group-hover:bg-blue-600"
+        />
+        <StatCard 
+          title="Students" 
+          value={stats?.users?.students} 
+          icon="🎓" 
+          color="bg-green-500" 
+          hoverColor="group-hover:bg-green-600"
+        />
+        <StatCard 
+          title="Teachers" 
+          value={stats?.users?.teachers} 
+          icon="👩‍🏫" 
+          color="bg-purple-500" 
+          hoverColor="group-hover:bg-purple-600"
+        />
+        <StatCard 
+          title="Classes" 
+          value={stats?.academics?.classes} 
+          icon="🏫" 
+          color="bg-orange-500" 
+          hoverColor="group-hover:bg-orange-600"
+        />
       </div>
 
-      {/* Second Row of Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <StatCard title="Attendance" value={stats?.academics?.attendanceRecords} color="bg-indigo-500" />
-        <StatCard title="Marks" value={stats?.academics?.marksEntered} color="bg-pink-500" />
-        <StatCard title="Resources" value={stats?.academics?.resourcesUploaded} color="bg-teal-500" />
-        <StatCard title="Fees Collected" value={`${stats?.finance?.totalCollected || 0} Birr`} color="bg-emerald-500" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <StatCard 
+          title="Attendance" 
+          value={stats?.academics?.attendanceRecords} 
+          icon="📅" 
+          color="bg-indigo-500" 
+          hoverColor="group-hover:bg-indigo-600"
+        />
+        <StatCard 
+          title="Marks Entered" 
+          value={stats?.academics?.marksEntered} 
+          icon="📝" 
+          color="bg-pink-500" 
+          hoverColor="group-hover:bg-pink-600"
+        />
+        <StatCard 
+          title="Resources" 
+          value={stats?.academics?.resourcesUploaded} 
+          icon="📚" 
+          color="bg-teal-500" 
+          hoverColor="group-hover:bg-teal-600"
+        />
+        <StatCard 
+          title="Fees Collected" 
+          value={`${stats?.finance?.totalCollected || 0} Birr`} 
+          icon="💰" 
+          color="bg-emerald-500" 
+          hoverColor="group-hover:bg-emerald-600"
+        />
       </div>
 
-      {/* Responsive Image Section */}
-      <div className="mb-6 bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="flex justify-center p-4">
-          <img
-            src="/wachemo-school.jpg"
-            alt="Wachemo School Campus"
-            className="w-auto h-auto max-h-64 max-w-full object-contain"
-          />
+      {/* 2. የተሻሻለው የምስል ክፍል (Premium Banner Style) */}
+      <div className="relative overflow-hidden rounded-2xl shadow-xl group">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+        <img
+          src="/wachemo-school.jpg"
+          alt="Wachemo School Campus"
+          className="w-full h-64 md:h-80 object-cover transform group-hover:scale-105 transition-transform duration-700 ease-in-out"
+        />
+        <div className="absolute bottom-0 left-0 right-0 p-6 z-20">
+          <h2 className="text-2xl font-bold text-white mb-2">Wachemo Community Excellency School</h2>
+          <p className="text-gray-200 text-sm">Integrated School Community Management System</p>
         </div>
-        <div className="p-4 pt-0 text-center border-t border-gray-100">
-          <p className="text-gray-700 font-medium">Wachemo Community Excellency School</p>
-        </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow-sm p-6">
-        <h2 className="text-lg font-bold text-gray-800 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <QuickAction to="/admin/users" label="Manage Users" icon="👥" />
-          <QuickAction to="/admin/classes" label="Manage Classes" icon="🏫" />
-          <QuickAction to="/admin/reports" label="View Reports" icon="📊" />
-          <QuickAction to="/admin/announcements" label="Announcements" icon="📢" />
+      {/* 3. የፈጣን ተግባራት ክፍል (Quick Actions with Hover) */}
+      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+          <span>⚡</span> Quick Actions
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <QuickAction to="/admin/users" label="Manage Users" icon="👥" color="text-blue-600" bg="bg-blue-50" hoverBg="hover:bg-blue-100" />
+          <QuickAction to="/admin/classes" label="Manage Classes" icon="🏫" color="text-orange-600" bg="bg-orange-50" hoverBg="hover:bg-orange-100" />
+          <QuickAction to="/admin/reports" label="View Reports" icon="📈" color="text-green-600" bg="bg-green-50" hoverBg="hover:bg-green-100" />
+          <QuickAction to="/admin/announcements" label="Announcements" icon="📢" color="text-purple-600" bg="bg-purple-50" hoverBg="hover:bg-purple-100" />
         </div>
       </div>
     </div>
   );
 }
 
-function StatCard({ title, value, color }) {
+// --- የስታቲስቲክስ ካርድ (Hover ሲደረግ የሚንቀሳቀስ) ---
+function StatCard({ title, value, icon, color, hoverColor }) {
   return (
-    <div className="bg-white rounded-lg shadow-sm p-5">
-      <div className={`w-10 h-10 ${color} rounded-lg mb-3`}></div>
-      <div className="text-2xl font-bold text-gray-800">{value ?? 0}</div>
-      <div className="text-sm text-gray-500">{title}</div>
+    <div className={`group bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 p-5 border border-gray-100 cursor-pointer`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-2xl text-white ${color} ${hoverColor} transition-colors`}>
+          {icon}
+        </div>
+        <div className="text-gray-400 group-hover:text-gray-600 transition-colors">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </div>
+      <div>
+        <div className="text-2xl font-bold text-gray-800 group-hover:text-indigo-600 transition-colors">{value ?? 0}</div>
+        <div className="text-sm text-gray-500 font-medium mt-1">{title}</div>
+      </div>
     </div>
   );
 }
 
-function QuickAction({ to, label, icon }) {
+// --- የፈጣን ተግባራት ካርድ (Hover ሲደረግ የሚንቀሳቀስ) ---
+function QuickAction({ to, label, icon, color, bg, hoverBg }) {
   return (
-    <Link to={to} className="bg-gray-50 hover:bg-gray-100 p-4 rounded-lg text-center transition">
-      <div className="text-2xl mb-1">{icon}</div>
-      <div className="text-sm font-medium text-gray-700">{label}</div>
+    <Link 
+      to={to} 
+      className={`${bg} ${hoverBg} p-4 rounded-xl text-center transition-all duration-200 transform hover:-translate-y-1 hover:shadow-md border border-transparent hover:border-gray-200 flex flex-col items-center justify-center gap-2`}
+    >
+      <div className={`text-3xl ${color}`}>{icon}</div>
+      <div className={`text-sm font-semibold ${color}`}>{label}</div>
     </Link>
   );
 }
