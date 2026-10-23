@@ -12,8 +12,12 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50 flex">
       <aside className="w-64 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col">
         <div className="p-4 border-b">
-          <div className="w-12 h-12 bg-indigo-600 rounded-full mx-auto flex items-center justify-center text-white font-bold">
-            WC
+         <div className="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-indigo-100 shadow-sm">
+            <img 
+              src="/wachemo-school.jpg" 
+              alt="Wachemo School" 
+              className="w-full h-full object-cover"
+            />
           </div>
           <h2 className="text-center text-sm font-bold mt-2">Wachemo University</h2>
           <p className="text-center text-xs text-gray-500">ISCMS Admin</p>
