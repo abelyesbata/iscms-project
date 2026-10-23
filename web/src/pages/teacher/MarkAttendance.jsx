@@ -9,11 +9,12 @@ export default function MarkAttendance() {
   const [selectedClass, setSelectedClass] = useState('');
   const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState({});
-  const [attendanceDate, setAttendanceDate] = useState(
-    new Date().toISOString().substring(0, 10)
-  );
+  const [attendanceDate, setAttendanceDate] = useState(new Date().toISOString().substring(0, 10));
   const [message, setMessage] = useState(null);
   const [saving, setSaving] = useState(false);
+  
+  // አዲስ የፍለጋ State
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     let cancelled = false;
@@ -43,6 +44,7 @@ export default function MarkAttendance() {
   const handleClassSelect = (classId) => {
     setSelectedClass(classId);
     setMessage(null);
+    setSearchQuery(''); // ክፍል ሲቀየር ፍለጋውን አጽዳ
 
     const cls = classes.find((c) => c._id === classId);
     if (!cls) {
@@ -53,7 +55,6 @@ export default function MarkAttendance() {
 
     setStudents(cls.students || []);
 
-    // Default all to "present"
     const initial = {};
     (cls.students || []).forEach((s) => {
       initial[s._id] = 'present';
@@ -66,8 +67,14 @@ export default function MarkAttendance() {
   };
 
   const markAll = (status) => {
-    const updated = {};
-    students.forEach((s) => {
+    // የተጣሩትን ተማሪዎች ብቻ ለውጥ
+    const filteredStudents = students.filter(s => 
+      s.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      s.email.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    
+    const updated = { ...attendance };
+    filteredStudents.forEach((s) => {
       updated[s._id] = status;
     });
     setAttendance(updated);
@@ -113,23 +120,21 @@ export default function MarkAttendance() {
     return <div className="text-center py-12 text-gray-500">Loading classes...</div>;
   }
 
+  // በፍለጋ ሳጥኑ መሰረት የተጣሩ ተማሪዎች
+  const filteredStudents = students.filter(s => 
+    s.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    s.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Mark Attendance</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Record daily attendance for your students
-        </p>
+        <p className="text-sm text-gray-500 mt-1">Record daily attendance for your students</p>
       </div>
 
       {message && (
-        <div
-          className={`mb-4 px-4 py-3 rounded-lg ${
-            message.type === 'success'
-              ? 'bg-green-50 text-green-700 border border-green-200'
-              : 'bg-red-50 text-red-700 border border-red-200'
-          }`}
-        >
+        <div className={`mb-4 px-4 py-3 rounded-lg ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
           {message.text}
         </div>
       )}
@@ -137,9 +142,7 @@ export default function MarkAttendance() {
       {/* Controls */}
       <div className="bg-white rounded-lg shadow p-4 mb-6 flex flex-wrap gap-4 items-end">
         <div className="flex-1 min-w-[200px]">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Class
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Class</label>
           <select
             value={selectedClass}
             onChange={(e) => handleClassSelect(e.target.value)}
@@ -155,9 +158,7 @@ export default function MarkAttendance() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Date
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
           <input
             type="date"
             value={attendanceDate}
@@ -166,57 +167,61 @@ export default function MarkAttendance() {
           />
         </div>
 
+        {/* 👇 አዲሱ የፍለጋ ሳጥን (Search Box) */}
         {students.length > 0 && (
-          <>
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Search Student</label>
+            <input
+              type="text"
+              placeholder="Type name or email..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            />
+          </div>
+        )}
+
+        {students.length > 0 && (
+          <div className="flex gap-2">
             <button
               type="button"
               onClick={() => markAll('present')}
-              className="text-sm bg-green-100 hover:bg-green-200 text-green-800 px-3 py-2 rounded-lg"
+              className="text-sm bg-green-100 hover:bg-green-200 text-green-800 px-3 py-2 rounded-lg transition"
             >
               All Present
             </button>
             <button
               type="button"
               onClick={() => markAll('absent')}
-              className="text-sm bg-red-100 hover:bg-red-200 text-red-800 px-3 py-2 rounded-lg"
+              className="text-sm bg-red-100 hover:bg-red-200 text-red-800 px-3 py-2 rounded-lg transition"
             >
               All Absent
             </button>
-          </>
+          </div>
         )}
       </div>
 
       {/* Student list */}
       {classes.length === 0 ? (
-        <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">
-          You are not assigned to any class as homeroom teacher.
-        </div>
+        <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">You are not assigned to any class as homeroom teacher.</div>
       ) : !selectedClass ? (
-        <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">
-          Select a class to start marking attendance.
-        </div>
+        <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">Select a class to start marking attendance.</div>
       ) : students.length === 0 ? (
-        <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">
-          This class has no students yet.
-        </div>
+        <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">This class has no students yet.</div>
+      ) : filteredStudents.length === 0 ? (
+        <div className="bg-gray-50 rounded-lg p-6 text-center text-gray-500">No students match your search "{searchQuery}".</div>
       ) : (
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50 border-b">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  #
-                </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                  Student
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                  Status
-                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">#</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Status</th>
               </tr>
             </thead>
             <tbody>
-              {students.map((s, idx) => (
+              {filteredStudents.map((s, idx) => (
                 <tr key={s._id} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm text-gray-500">{idx + 1}</td>
                   <td className="px-4 py-3 text-sm">
@@ -230,15 +235,9 @@ export default function MarkAttendance() {
                           key={status}
                           type="button"
                           onClick={() => handleStatusChange(s._id, status)}
-                          className={`text-xs px-3 py-1 rounded-full border capitalize ${
+                          className={`text-xs px-3 py-1 rounded-full border capitalize transition-colors ${
                             attendance[s._id] === status
-                              ? status === 'present'
-                                ? 'bg-green-500 text-white border-green-500'
-                                : status === 'absent'
-                                ? 'bg-red-500 text-white border-red-500'
-                                : status === 'late'
-                                ? 'bg-yellow-500 text-white border-yellow-500'
-                                : 'bg-blue-500 text-white border-blue-500'
+                              ? status === 'present' ? 'bg-green-500 text-white border-green-500' : status === 'absent' ? 'bg-red-500 text-white border-red-500' : status === 'late' ? 'bg-yellow-500 text-white border-yellow-500' : 'bg-blue-500 text-white border-blue-500'
                               : 'bg-white text-gray-600 border-gray-300 hover:border-gray-400'
                           }`}
                         >
@@ -254,14 +253,9 @@ export default function MarkAttendance() {
 
           <div className="p-4 border-t bg-gray-50 flex justify-between items-center">
             <div className="text-sm text-gray-600">
-              {Object.values(attendance).filter((v) => v === 'present').length} present ·{' '}
-              {Object.values(attendance).filter((v) => v === 'absent').length} absent
+              {Object.values(attendance).filter((v) => v === 'present').length} present · {Object.values(attendance).filter((v) => v === 'absent').length} absent
             </div>
-            <button
-              type="submit"
-              disabled={saving}
-              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-6 py-2 rounded-lg"
-            >
+            <button type="submit" disabled={saving} className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-6 py-2 rounded-lg">
               {saving ? 'Saving...' : 'Save Attendance'}
             </button>
           </div>

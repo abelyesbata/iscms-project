@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import API from '../../services/api';
 
 export default function ManageClasses() {
@@ -13,6 +13,11 @@ export default function ManageClasses() {
   const [selectedStudent, setSelectedStudent] = useState('');
   const [message, setMessage] = useState(null);
 
+  // ለፍለጋ (Search) የሚያገለግሉ States
+  const [studentSearchQuery, setStudentSearchQuery] = useState('');
+  const [isStudentDropdownOpen, setIsStudentDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
   const [form, setForm] = useState({
     className: '',
     gradeLevel: '',
@@ -20,6 +25,17 @@ export default function ManageClasses() {
     academicYear: '2025/2026',
     capacity: 30
   });
+
+  // Dropdown ከተከፈተ ውጭ ሲነካ ለመዝጋት
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsStudentDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Initial load
   useEffect(() => {
@@ -67,19 +83,10 @@ export default function ManageClasses() {
       await API.post('/classes', form);
       setMessage({ type: 'success', text: 'Class created successfully' });
       setShowCreateForm(false);
-      setForm({
-        className: '',
-        gradeLevel: '',
-        section: 'A',
-        academicYear: '2025/2026',
-        capacity: 30
-      });
+      setForm({ className: '', gradeLevel: '', section: 'A', academicYear: '2025/2026', capacity: 30 });
       refreshClasses();
     } catch (err) {
-      setMessage({
-        type: 'error',
-        text: err.response?.data?.message || 'Failed to create class'
-      });
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to create class' });
     }
   };
 
@@ -91,18 +98,13 @@ export default function ManageClasses() {
     }
 
     try {
-      await API.put(`/classes/${assigningClass._id}`, {
-        homeroomTeacher: selectedTeacher
-      });
+      await API.put(`/classes/${assigningClass._id}`, { homeroomTeacher: selectedTeacher });
       setMessage({ type: 'success', text: 'Teacher assigned successfully' });
       setAssigningClass(null);
       setSelectedTeacher('');
       refreshClasses();
     } catch (err) {
-      setMessage({
-        type: 'error',
-        text: err.response?.data?.message || 'Assignment failed'
-      });
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Assignment failed' });
     }
   };
 
@@ -114,21 +116,17 @@ export default function ManageClasses() {
     }
 
     try {
-      await API.post(`/classes/${managingStudentsFor._id}/students`, {
-        studentId: selectedStudent
-      });
+      await API.post(`/classes/${managingStudentsFor._id}/students`, { studentId: selectedStudent });
       setMessage({ type: 'success', text: 'Student added successfully' });
       setSelectedStudent('');
+      setStudentSearchQuery('');
       await refreshClasses();
-      // Update the managing view with fresh data
+      
       const res = await API.get('/classes');
       const updated = res.data.classes.find((c) => c._id === managingStudentsFor._id);
       setManagingStudentsFor(updated);
     } catch (err) {
-      setMessage({
-        type: 'error',
-        text: err.response?.data?.message || 'Failed to add student'
-      });
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to add student' });
     }
   };
 
@@ -143,10 +141,7 @@ export default function ManageClasses() {
       const updated = res.data.classes.find((c) => c._id === managingStudentsFor._id);
       setManagingStudentsFor(updated);
     } catch (err) {
-      setMessage({
-        type: 'error',
-        text: err.response?.data?.message || 'Failed to remove student'
-      });
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Failed to remove student' });
     }
   };
 
@@ -158,10 +153,7 @@ export default function ManageClasses() {
       setMessage({ type: 'success', text: 'Class deleted' });
       refreshClasses();
     } catch (err) {
-      setMessage({
-        type: 'error',
-        text: err.response?.data?.message || 'Delete failed'
-      });
+      setMessage({ type: 'error', text: err.response?.data?.message || 'Delete failed' });
     }
   };
 
@@ -170,25 +162,19 @@ export default function ManageClasses() {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div className="p-4 md:p-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-3">
         <h1 className="text-2xl font-bold text-gray-800">Manage Classes</h1>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg"
+          className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg"
         >
           {showCreateForm ? 'Cancel' : '+ New Class'}
         </button>
       </div>
 
       {message && (
-        <div
-          className={`mb-4 px-4 py-3 rounded-lg ${
-            message.type === 'success'
-              ? 'bg-green-50 text-green-700 border border-green-200'
-              : 'bg-red-50 text-red-700 border border-red-200'
-          }`}
-        >
+        <div className={`mb-4 px-4 py-3 rounded-lg ${message.type === 'success' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-red-50 text-red-700 border border-red-200'}`}>
           {message.text}
         </div>
       )}
@@ -197,84 +183,39 @@ export default function ManageClasses() {
       {showCreateForm && (
         <form onSubmit={handleCreate} className="bg-white p-6 rounded-lg shadow mb-6 space-y-3">
           <h2 className="text-lg font-bold text-gray-800 mb-3">New Class</h2>
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              required
-              placeholder="Class Name (e.g., Grade 5A)"
-              value={form.className}
-              onChange={(e) => setForm({ ...form, className: e.target.value })}
-              className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-            />
-            <input
-              required
-              placeholder="Grade Level (e.g., Grade 5)"
-              value={form.gradeLevel}
-              onChange={(e) => setForm({ ...form, gradeLevel: e.target.value })}
-              className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-            />
-            <input
-              placeholder="Section"
-              value={form.section}
-              onChange={(e) => setForm({ ...form, section: e.target.value })}
-              className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-            />
-            <input
-              required
-              placeholder="Academic Year"
-              value={form.academicYear}
-              onChange={(e) => setForm({ ...form, academicYear: e.target.value })}
-              className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-            />
-            <input
-              type="number"
-              placeholder="Capacity"
-              value={form.capacity}
-              onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) })}
-              className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <input required placeholder="Class Name (e.g., Grade 5A)" value={form.className} onChange={(e) => setForm({ ...form, className: e.target.value })} className="px-3 py-2 border rounded-lg" />
+            <input required placeholder="Grade Level (e.g., Grade 5)" value={form.gradeLevel} onChange={(e) => setForm({ ...form, gradeLevel: e.target.value })} className="px-3 py-2 border rounded-lg" />
+            <input placeholder="Section" value={form.section} onChange={(e) => setForm({ ...form, section: e.target.value })} className="px-3 py-2 border rounded-lg" />
+            <input required placeholder="Academic Year" value={form.academicYear} onChange={(e) => setForm({ ...form, academicYear: e.target.value })} className="px-3 py-2 border rounded-lg" />
+            <input type="number" placeholder="Capacity" value={form.capacity} onChange={(e) => setForm({ ...form, capacity: Number(e.target.value) })} className="px-3 py-2 border rounded-lg" />
           </div>
-          <button
-            type="submit"
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"
-          >
-            Create Class
-          </button>
+          <button type="submit" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Create Class</button>
         </form>
       )}
 
       {/* Class list */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {classes.length === 0 ? (
-          <div className="col-span-full text-center py-8 text-gray-500">
-            No classes yet. Create one!
-          </div>
+          <div className="col-span-full text-center py-8 text-gray-500">No classes yet. Create one!</div>
         ) : (
           classes.map((cls) => (
             <div key={cls._id} className="bg-white rounded-lg shadow p-5">
               <div className="flex justify-between items-start mb-3">
                 <div>
                   <h3 className="text-lg font-bold text-gray-800">{cls.className}</h3>
-                  <p className="text-sm text-gray-500">
-                    {cls.gradeLevel} - Section {cls.section}
-                  </p>
+                  <p className="text-sm text-gray-500">{cls.gradeLevel} - Section {cls.section}</p>
                 </div>
-                <span className="text-xs px-2 py-1 bg-gray-100 rounded">
-                  {cls.academicYear}
-                </span>
+                <span className="text-xs px-2 py-1 bg-gray-100 rounded">{cls.academicYear}</span>
               </div>
 
               <div className="space-y-2 mb-4">
                 <p className="text-sm text-gray-600">👥 Capacity: {cls.capacity}</p>
-                <p className="text-sm text-gray-600">
-                  🎓 Students: {cls.students?.length || 0}
-                </p>
-
+                <p className="text-sm text-gray-600">🎓 Students: {cls.students?.length || 0}</p>
                 <div className="bg-gray-50 p-3 rounded">
                   <p className="text-xs font-medium text-gray-500 mb-1">HOMEROOM TEACHER</p>
                   {cls.homeroomTeacher ? (
-                    <p className="text-sm font-medium text-gray-800">
-                      {cls.homeroomTeacher.fullName || 'Assigned'}
-                    </p>
+                    <p className="text-sm font-medium text-gray-800">{cls.homeroomTeacher.fullName || 'Assigned'}</p>
                   ) : (
                     <p className="text-sm text-gray-400 italic">Not assigned</p>
                   )}
@@ -302,12 +243,7 @@ export default function ManageClasses() {
                 >
                   Students
                 </button>
-                <button
-                  onClick={() => handleDelete(cls)}
-                  className="text-xs text-red-600 hover:text-red-800 px-2"
-                >
-                  Delete
-                </button>
+                <button onClick={() => handleDelete(cls)} className="text-xs text-red-600 hover:text-red-800 px-2">Delete</button>
               </div>
             </div>
           ))
@@ -320,146 +256,130 @@ export default function ManageClasses() {
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-800">Assign Teacher</h2>
-              <button
-                onClick={() => setAssigningClass(null)}
-                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
-              >
-                ×
-              </button>
+              <button onClick={() => setAssigningClass(null)} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
             </div>
-
-            <p className="text-sm text-gray-600 mb-4">
-              Class: <span className="font-medium">{assigningClass.className}</span>
-            </p>
-
+            <p className="text-sm text-gray-600 mb-4">Class: <span className="font-medium">{assigningClass.className}</span></p>
             <form onSubmit={handleAssignTeacher} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Teacher
-                </label>
-                <select
-                  value={selectedTeacher}
-                  onChange={(e) => setSelectedTeacher(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                  required
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-1">Select Teacher</label>
+                <select value={selectedTeacher} onChange={(e) => setSelectedTeacher(e.target.value)} className="w-full px-3 py-2 border rounded-lg" required>
                   <option value="">-- Choose a teacher --</option>
                   {teachers.map((t) => (
-                    <option key={t._id} value={t._id}>
-                      {t.fullName} ({t.email})
-                    </option>
+                    <option key={t._id} value={t._id}>{t.fullName} ({t.email})</option>
                   ))}
                 </select>
               </div>
-
               <div className="flex gap-2 pt-2">
-                <button
-                  type="submit"
-                  disabled={!selectedTeacher}
-                  className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white py-2 rounded-lg"
-                >
-                  Assign
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAssigningClass(null)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Cancel
-                </button>
+                <button type="submit" disabled={!selectedTeacher} className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white py-2 rounded-lg">Assign</button>
+                <button type="button" onClick={() => setAssigningClass(null)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Manage students modal */}
+      {/* Manage students modal with SEARCH */}
       {managingStudentsFor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-auto">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-800">
-                Students in {managingStudentsFor.className}
-              </h2>
-              <button
-                onClick={() => setManagingStudentsFor(null)}
-                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
-              >
-                ×
-              </button>
+              <h2 className="text-xl font-bold text-gray-800">Students in {managingStudentsFor.className}</h2>
+              <button onClick={() => setManagingStudentsFor(null)} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
             </div>
 
-            {/* Current students */}
             <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">
-                Enrolled Students ({managingStudentsFor.students?.length || 0})
-              </h3>
+              <h3 className="text-sm font-medium text-gray-700 mb-2">Enrolled Students ({managingStudentsFor.students?.length || 0})</h3>
               {managingStudentsFor.students?.length === 0 ? (
-                <p className="text-sm text-gray-500 italic bg-gray-50 p-3 rounded">
-                  No students enrolled yet.
-                </p>
+                <p className="text-sm text-gray-500 italic bg-gray-50 p-3 rounded">No students enrolled yet.</p>
               ) : (
                 <ul className="space-y-2">
                   {managingStudentsFor.students.map((s) => (
-                    <li
-                      key={s._id}
-                      className="flex justify-between items-center bg-gray-50 p-3 rounded"
-                    >
+                    <li key={s._id} className="flex justify-between items-center bg-gray-50 p-3 rounded">
                       <div>
                         <p className="text-sm font-medium">{s.fullName}</p>
                         <p className="text-xs text-gray-500">{s.email}</p>
                       </div>
-                      <button
-                        onClick={() => handleRemoveStudent(s._id)}
-                        className="text-red-600 hover:text-red-800 text-sm"
-                      >
-                        Remove
-                      </button>
+                      <button onClick={() => handleRemoveStudent(s._id)} className="text-red-600 hover:text-red-800 text-sm font-medium">Remove</button>
                     </li>
                   ))}
                 </ul>
               )}
             </div>
 
-            {/* Add student */}
+            {/* Add student with Searchable Dropdown */}
             <form onSubmit={handleAddStudent} className="border-t pt-4 space-y-3">
               <h3 className="text-sm font-medium text-gray-700">Add Student</h3>
-              <div className="flex gap-2">
-                <select
-                  value={selectedStudent}
-                  onChange={(e) => setSelectedStudent(e.target.value)}
-                  className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none"
-                >
-                  <option value="">-- Choose a student --</option>
-                  {students
-                    .filter(
-                      (s) =>
-                        !managingStudentsFor.students?.some(
-                          (enrolled) => enrolled._id === s._id
-                        )
-                    )
-                    .map((s) => (
-                      <option key={s._id} value={s._id}>
-                        {s.fullName} ({s.email})
-                      </option>
-                    ))}
-                </select>
+              
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex-1 relative" ref={dropdownRef}>
+                  <div 
+                    className="w-full px-3 py-2 border rounded-lg bg-white cursor-pointer flex justify-between items-center"
+                    onClick={() => setIsStudentDropdownOpen(!isStudentDropdownOpen)}
+                  >
+                    <span className={selectedStudent ? 'text-gray-900' : 'text-gray-500'}>
+                      {selectedStudent ? students.find(s => s._id === selectedStudent)?.fullName : '-- Search and choose a student --'}
+                    </span>
+                    <svg className={`w-4 h-4 transition-transform ${isStudentDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                  </div>
+
+                  {isStudentDropdownOpen && (
+                    <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-hidden flex flex-col">
+                      <div className="p-2 border-b bg-gray-50">
+                        <input
+                          type="text"
+                          placeholder="Type name or email to search..."
+                          value={studentSearchQuery}
+                          onChange={(e) => setStudentSearchQuery(e.target.value)}
+                          className="w-full px-3 py-1.5 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                          autoFocus
+                        />
+                      </div>
+                      
+                      <ul className="overflow-y-auto flex-1 p-1">
+                        {students
+                          .filter(s => 
+                            !managingStudentsFor.students?.some(enrolled => enrolled._id === s._id) &&
+                            (s.fullName.toLowerCase().includes(studentSearchQuery.toLowerCase()) || 
+                             s.email.toLowerCase().includes(studentSearchQuery.toLowerCase()))
+                          )
+                          .map((s) => (
+                            <li 
+                              key={s._id} 
+                              onClick={() => {
+                                setSelectedStudent(s._id);
+                                setIsStudentDropdownOpen(false);
+                                setStudentSearchQuery('');
+                              }}
+                              className="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer rounded-md transition-colors"
+                            >
+                              <div className="font-medium">{s.fullName}</div>
+                              <div className="text-xs text-gray-500">{s.email}</div>
+                            </li>
+                          ))}
+                          
+                        {students.filter(s => 
+                            !managingStudentsFor.students?.some(enrolled => enrolled._id === s._id) &&
+                            (s.fullName.toLowerCase().includes(studentSearchQuery.toLowerCase()) || 
+                             s.email.toLowerCase().includes(studentSearchQuery.toLowerCase()))
+                        ).length === 0 && (
+                          <li className="px-3 py-4 text-center text-sm text-gray-500">No students found.</li>
+                        )}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+
                 <button
                   type="submit"
                   disabled={!selectedStudent}
-                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg"
+                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white px-6 py-2 rounded-lg transition h-[42px]"
                 >
                   Add
                 </button>
               </div>
             </form>
 
-            <button
-              onClick={() => setManagingStudentsFor(null)}
-              className="mt-4 w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              Close
-            </button>
+            <button onClick={() => setManagingStudentsFor(null)} className="mt-4 w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">Close</button>
           </div>
         </div>
       )}
