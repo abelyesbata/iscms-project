@@ -41,8 +41,12 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-indigo-600">
       <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-indigo-600 rounded-full mx-auto mb-3 flex items-center justify-center text-white text-2xl font-bold">
-            WC
+        <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-indigo-100 shadow-md">
+            <img 
+              src="/wachemo-school.jpg" 
+              alt="Wachemo School" 
+              className="w-full h-full object-cover"
+            />
           </div>
           <h1 className="text-2xl font-bold text-gray-800">Wachemo University</h1>
           <p className="text-sm text-gray-500 mt-1">Integrated School Community Management System</p>
