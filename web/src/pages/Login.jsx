@@ -87,15 +87,15 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
                 placeholder="Enter your password"
-              />
-              {/* Show/Hide Password Icon */}
+              />   
+               {/* Show/Hide Password Icon */}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
               >
                 {showPassword ? '🙈' : '👁️'}
-              </button>
+              </button>    
             </div>
           </div>
      {/* Error Message */}
