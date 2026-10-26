@@ -13,10 +13,15 @@ export default function ManageClasses() {
   const [selectedStudent, setSelectedStudent] = useState('');
   const [message, setMessage] = useState(null);
 
-  // ለፍለጋ (Search) የሚያገለግሉ States
+  // 1. ለተማሪ ፍለጋ (Student Search) የሚያገለግሉ States
   const [studentSearchQuery, setStudentSearchQuery] = useState('');
   const [isStudentDropdownOpen, setIsStudentDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const studentDropdownRef = useRef(null);
+
+  // 2. ለመምህር ፍለጋ (Teacher Search) የሚያገለግሉ States
+  const [teacherSearchQuery, setTeacherSearchQuery] = useState('');
+  const [isTeacherDropdownOpen, setIsTeacherDropdownOpen] = useState(false);
+  const teacherDropdownRef = useRef(null);
 
   const [form, setForm] = useState({
     className: '',
@@ -29,8 +34,11 @@ export default function ManageClasses() {
   // Dropdown ከተከፈተ ውጭ ሲነካ ለመዝጋት
   useEffect(() => {
     function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (studentDropdownRef.current && !studentDropdownRef.current.contains(event.target)) {
         setIsStudentDropdownOpen(false);
+      }
+      if (teacherDropdownRef.current && !teacherDropdownRef.current.contains(event.target)) {
+        setIsTeacherDropdownOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -102,6 +110,7 @@ export default function ManageClasses() {
       setMessage({ type: 'success', text: 'Teacher assigned successfully' });
       setAssigningClass(null);
       setSelectedTeacher('');
+      setTeacherSearchQuery('');
       refreshClasses();
     } catch (err) {
       setMessage({ type: 'error', text: err.response?.data?.message || 'Assignment failed' });
@@ -132,7 +141,6 @@ export default function ManageClasses() {
 
   const handleRemoveStudent = async (studentId) => {
     if (!window.confirm('Remove this student from the class?')) return;
-
     try {
       await API.delete(`/classes/${managingStudentsFor._id}/students/${studentId}`);
       setMessage({ type: 'success', text: 'Student removed' });
@@ -147,7 +155,6 @@ export default function ManageClasses() {
 
   const handleDelete = async (cls) => {
     if (!window.confirm(`Delete class "${cls.className}"? This cannot be undone.`)) return;
-
     try {
       await API.delete(`/classes/${cls._id}`);
       setMessage({ type: 'success', text: 'Class deleted' });
@@ -160,6 +167,18 @@ export default function ManageClasses() {
   if (loading) {
     return <div className="text-center py-8 text-gray-500">Loading classes...</div>;
   }
+
+  // የመምህራን እና ተማሪዎች ፍለጋ ውጤት
+  const filteredTeachers = teachers.filter(t => 
+    t.fullName.toLowerCase().includes(teacherSearchQuery.toLowerCase()) || 
+    t.email.toLowerCase().includes(teacherSearchQuery.toLowerCase())
+  );
+
+  const filteredStudents = students.filter(s => 
+    !managingStudentsFor?.students?.some(enrolled => enrolled._id === s._id) &&
+    (s.fullName.toLowerCase().includes(studentSearchQuery.toLowerCase()) || 
+     s.email.toLowerCase().includes(studentSearchQuery.toLowerCase()))
+  );
 
   return (
     <div className="p-4 md:p-6">
@@ -227,6 +246,8 @@ export default function ManageClasses() {
                   onClick={() => {
                     setAssigningClass(cls);
                     setSelectedTeacher(cls.homeroomTeacher?._id || '');
+                    setTeacherSearchQuery('');
+                    setIsTeacherDropdownOpen(false);
                     setMessage(null);
                   }}
                   className="flex-1 text-xs bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-3 rounded-lg"
@@ -237,6 +258,8 @@ export default function ManageClasses() {
                   onClick={() => {
                     setManagingStudentsFor(cls);
                     setSelectedStudent('');
+                    setStudentSearchQuery('');
+                    setIsStudentDropdownOpen(false);
                     setMessage(null);
                   }}
                   className="flex-1 text-xs bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded-lg"
@@ -250,7 +273,7 @@ export default function ManageClasses() {
         )}
       </div>
 
-      {/* Assign teacher modal */}
+      {/* 👇 1. Assign teacher modal (WITH SEARCH) */}
       {assigningClass && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
@@ -259,16 +282,58 @@ export default function ManageClasses() {
               <button onClick={() => setAssigningClass(null)} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
             </div>
             <p className="text-sm text-gray-600 mb-4">Class: <span className="font-medium">{assigningClass.className}</span></p>
+            
             <form onSubmit={handleAssignTeacher} className="space-y-4">
-              <div>
+              <div className="relative" ref={teacherDropdownRef}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Select Teacher</label>
-                <select value={selectedTeacher} onChange={(e) => setSelectedTeacher(e.target.value)} className="w-full px-3 py-2 border rounded-lg" required>
-                  <option value="">-- Choose a teacher --</option>
-                  {teachers.map((t) => (
-                    <option key={t._id} value={t._id}>{t.fullName} ({t.email})</option>
-                  ))}
-                </select>
+                
+                {/* Searchable Dropdown for Teachers */}
+                <div 
+                  className="w-full px-3 py-2 border rounded-lg bg-white cursor-pointer flex justify-between items-center"
+                  onClick={() => setIsTeacherDropdownOpen(!isTeacherDropdownOpen)}
+                >
+                  <span className={selectedTeacher ? 'text-gray-900' : 'text-gray-500'}>
+                    {selectedTeacher ? teachers.find(t => t._id === selectedTeacher)?.fullName : '-- Search and choose a teacher --'}
+                  </span>
+                  <svg className={`w-4 h-4 transition-transform ${isTeacherDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+
+                {isTeacherDropdownOpen && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-hidden flex flex-col">
+                    <div className="p-2 border-b bg-gray-50">
+                      <input
+                        type="text"
+                        placeholder="Type name or email to search..."
+                        value={teacherSearchQuery}
+                        onChange={(e) => setTeacherSearchQuery(e.target.value)}
+                        className="w-full px-3 py-1.5 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        autoFocus
+                      />
+                    </div>
+                    
+                    <ul className="overflow-y-auto flex-1 p-1">
+                      {filteredTeachers.map((t) => (
+                        <li 
+                          key={t._id} 
+                          onClick={() => {
+                            setSelectedTeacher(t._id);
+                            setIsTeacherDropdownOpen(false);
+                            setTeacherSearchQuery('');
+                          }}
+                          className="px-3 py-2 text-sm hover:bg-indigo-50 cursor-pointer rounded-md transition-colors"
+                        >
+                          <div className="font-medium">{t.fullName}</div>
+                          <div className="text-xs text-gray-500">{t.email}</div>
+                        </li>
+                      ))}
+                      {filteredTeachers.length === 0 && (
+                        <li className="px-3 py-4 text-center text-sm text-gray-500">No teachers found.</li>
+                      )}
+                    </ul>
+                  </div>
+                )}
               </div>
+
               <div className="flex gap-2 pt-2">
                 <button type="submit" disabled={!selectedTeacher} className="flex-1 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 text-white py-2 rounded-lg">Assign</button>
                 <button type="button" onClick={() => setAssigningClass(null)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
@@ -278,7 +343,7 @@ export default function ManageClasses() {
         </div>
       )}
 
-      {/* Manage students modal with SEARCH */}
+      {/* 👇 2. Manage students modal (WITH SEARCH) */}
       {managingStudentsFor && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-auto">
@@ -306,12 +371,11 @@ export default function ManageClasses() {
               )}
             </div>
 
-            {/* Add student with Searchable Dropdown */}
             <form onSubmit={handleAddStudent} className="border-t pt-4 space-y-3">
               <h3 className="text-sm font-medium text-gray-700">Add Student</h3>
               
               <div className="flex flex-col sm:flex-row gap-2">
-                <div className="flex-1 relative" ref={dropdownRef}>
+                <div className="flex-1 relative" ref={studentDropdownRef}>
                   <div 
                     className="w-full px-3 py-2 border rounded-lg bg-white cursor-pointer flex justify-between items-center"
                     onClick={() => setIsStudentDropdownOpen(!isStudentDropdownOpen)}
@@ -336,32 +400,21 @@ export default function ManageClasses() {
                       </div>
                       
                       <ul className="overflow-y-auto flex-1 p-1">
-                        {students
-                          .filter(s => 
-                            !managingStudentsFor.students?.some(enrolled => enrolled._id === s._id) &&
-                            (s.fullName.toLowerCase().includes(studentSearchQuery.toLowerCase()) || 
-                             s.email.toLowerCase().includes(studentSearchQuery.toLowerCase()))
-                          )
-                          .map((s) => (
-                            <li 
-                              key={s._id} 
-                              onClick={() => {
-                                setSelectedStudent(s._id);
-                                setIsStudentDropdownOpen(false);
-                                setStudentSearchQuery('');
-                              }}
-                              className="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer rounded-md transition-colors"
-                            >
-                              <div className="font-medium">{s.fullName}</div>
-                              <div className="text-xs text-gray-500">{s.email}</div>
-                            </li>
-                          ))}
-                          
-                        {students.filter(s => 
-                            !managingStudentsFor.students?.some(enrolled => enrolled._id === s._id) &&
-                            (s.fullName.toLowerCase().includes(studentSearchQuery.toLowerCase()) || 
-                             s.email.toLowerCase().includes(studentSearchQuery.toLowerCase()))
-                        ).length === 0 && (
+                        {filteredStudents.map((s) => (
+                          <li 
+                            key={s._id} 
+                            onClick={() => {
+                              setSelectedStudent(s._id);
+                              setIsStudentDropdownOpen(false);
+                              setStudentSearchQuery('');
+                            }}
+                            className="px-3 py-2 text-sm hover:bg-green-50 cursor-pointer rounded-md transition-colors"
+                          >
+                            <div className="font-medium">{s.fullName}</div>
+                            <div className="text-xs text-gray-500">{s.email}</div>
+                          </li>
+                        ))}
+                        {filteredStudents.length === 0 && (
                           <li className="px-3 py-4 text-center text-sm text-gray-500">No students found.</li>
                         )}
                       </ul>
@@ -369,13 +422,7 @@ export default function ManageClasses() {
                   )}
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={!selectedStudent}
-                  className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white px-6 py-2 rounded-lg transition h-[42px]"
-                >
-                  Add
-                </button>
+                <button type="submit" disabled={!selectedStudent} className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white px-6 py-2 rounded-lg transition h-[42px]">Add</button>
               </div>
             </form>
 
