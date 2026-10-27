@@ -607,7 +607,6 @@ exports.getOverdueStudents = async (req, res) => {
     });
   }
 };
-
 // ==========================================
 // INITIATE CHAPA PAYMENT (Real Gateway)
 // POST /api/payments/chapa/initiate
@@ -679,21 +678,41 @@ exports.initiateChapaPayment = async (req, res) => {
     const totalAmount = settings.baseAmount + (penalty || 0);
     const tx_ref = `ISCMS-${Date.now()}-${Math.random().toString(36).substring(7)}`;
 
-    const payment = await Payment.create({
+    // 🔥 ማስተካከያ፦ አስቀድሞ የ "pending" ሪከርድ ካለ አዲስ ከመፍጠር ይልቅ ያለውን እናዘምን
+    let payment = await Payment.findOne({
       student: studentId,
-      parent: req.user.role === 'parent' ? req.user._id : null,
-      classroom: classroom._id,
-      amount: settings.baseAmount,
-      penalty: penalty || 0,
       periodLabel: settings.periodLabel,
-      period: 'Monthly',
-      dueDate: settings.currentDueDate,
-      daysLate: daysLate > 0 ? daysLate : 0,
-      status: daysLate > 0 ? 'overdue' : 'pending',
-      method: 'Chapa',
-      transactionId: tx_ref,
-      createdBy: req.user._id
+      status: { $in: ['pending', 'overdue'] }
     });
+
+    if (payment) {
+      // ያለውን ሪከርድ አዘምን (አዲስ አትፍጠር)
+      payment.penalty = penalty || 0;
+      payment.dueDate = settings.currentDueDate;
+      payment.daysLate = daysLate > 0 ? daysLate : 0;
+      payment.amount = settings.baseAmount;
+      payment.method = 'Chapa';
+      payment.transactionId = tx_ref;
+      if (daysLate > 0) payment.status = 'overdue';
+      await payment.save();
+    } else {
+      // ምንም ሪከርድ ከሌለ አዲስ ፍጠር
+      payment = await Payment.create({
+        student: studentId,
+        parent: req.user.role === 'parent' ? req.user._id : null,
+        classroom: classroom._id,
+        amount: settings.baseAmount,
+        penalty: penalty || 0,
+        periodLabel: settings.periodLabel,
+        period: 'Monthly',
+        dueDate: settings.currentDueDate,
+        daysLate: daysLate > 0 ? daysLate : 0,
+        status: daysLate > 0 ? 'overdue' : 'pending',
+        method: 'Chapa',
+        transactionId: tx_ref,
+        createdBy: req.user._id
+      });
+    }
 
     // Chapa API call with email fallback fix
     const chapaResponse = await axios.post(
@@ -701,10 +720,9 @@ exports.initiateChapaPayment = async (req, res) => {
       {
         amount: totalAmount,
         currency: 'ETB',
-        // Fallback logic for valid email
         email: (req.user.email && req.user.email.includes('@')) 
                ? req.user.email 
-               : 'abelyesfa5@gmail.com', // Change this to your real email
+               : 'abelyesfa5@gmail.com',
         first_name: req.user.name ? req.user.name.split(' ')[0] : 'Parent',
         last_name: req.user.name && req.user.name.split(' ').length > 1 ? req.user.name.split(' ')[1] : 'User',
         phone_number: '0900000000',
@@ -740,7 +758,6 @@ exports.initiateChapaPayment = async (req, res) => {
     });
   }
 };
-
 // ==========================================
 // VERIFY CHAPA PAYMENT (Webhook / Return)
 // GET /api/payments/chapa/verify/:txRef
