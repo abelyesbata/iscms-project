@@ -12,9 +12,13 @@ export default function LandingPage() {
           <div className="flex justify-between h-16 items-center">
             {/* Logo */}
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                WC
-              </div>
+              <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-indigo-100 shadow-md">
+            <img 
+              src="/wachemo-school.jpg" 
+              alt="Wachemo School" 
+              className="w-full h-full object-cover"
+            />
+          </div>
               <span className="font-bold text-lg hidden sm:block">Wachemo School</span>
             </div>
 
@@ -66,7 +70,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6">
             Modern School Management <br className="hidden md:block" />
-            <span className="text-indigo-600">Made Simple</span>
+            <span className="text-indigo-600">Made Simple and Responsive</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
             Integrated School Community Management System for Wachemo Community Excellency School. Manage students, teachers, grades, attendance, and payments all in one place.
