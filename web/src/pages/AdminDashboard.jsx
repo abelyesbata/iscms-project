@@ -7,110 +7,124 @@ export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  // ለሞባይል ሜኑ መክፈቻና መዝጊያ State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex overflow-hidden">
-      
-      {/* 1. Mobile Backdrop (ሜኑ ሲከፈት የኋላ በኩል ጨለማ ያደርጋል) */}
+    <div className="min-h-screen bg-slate-50 flex">
+      {/* 1. Mobile Backdrop */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-slate-900/50 z-40 md:hidden backdrop-blur-sm"
           onClick={() => setIsMobileMenuOpen(false)}
         ></div>
       )}
 
-      {/* 2. Sidebar (በሞባይል ላይ ተንሳፋፊ ሆኖ ይታያል) */}
+      {/* 2. Sidebar (Premium Design) */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 flex flex-col transform transition-transform duration-300 ease-in-out
+        fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-200 flex flex-col transform transition-all duration-300 ease-in-out shadow-2xl md:shadow-none
         md:relative md:translate-x-0
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="p-4 border-b flex justify-between items-center">
-          <div className="flex-1 text-center">
-            <div className="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden border-2 border-indigo-100 shadow-sm">
-              <img 
-                src="/wachemo-school.jpg" 
-                alt="Wachemo School" 
-                className="w-full h-full object-cover"
-              />
+        {/* የላይኛው የስም ክፍል */}
+        <div className="h-20 flex items-center px-6 border-b border-slate-100">
+          <div className="flex items-center gap-3 w-full">
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-md">
+              WC
             </div>
-            <h2 className="text-sm font-bold mt-2">Wachemo University</h2>
-            <p className="text-xs text-gray-500">ISCMS Admin</p>
+            <div>
+              <h2 className="text-base font-bold text-slate-800 tracking-tight">Wachemo</h2>
+              <p className="text-xs text-slate-500 font-medium">Admin Portal</p>
+            </div>
+            {/* Mobile X button */}
+            <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden ml-auto text-slate-400 hover:text-slate-600">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
           </div>
-          {/* በሞባይል ላይ ሜኑን ለመዝጋት (X) አዶ */}
-          <button 
-            onClick={() => setIsMobileMenuOpen(false)}
-            className="md:hidden absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-          </button>
         </div>
 
-        <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
-          {/* ሜኑ ሲነካ በራሱ እንዲዘጋ ለማድረግ onClick ተጨምሯል */}
-          <div onClick={() => setIsMobileMenuOpen(false)}>
-            <SidebarLink to="/admin" icon="📊" active={location.pathname === '/admin'}>
-              Dashboard
-            </SidebarLink>
-            <SidebarLink to="/admin/users" icon="👥" active={location.pathname === '/admin/users'}>
-              Manage Users
-            </SidebarLink>
-            <SidebarLink to="/admin/classes" icon="🏫" active={location.pathname === '/admin/classes'}>
-              Manage Classes
-            </SidebarLink>
-            <SidebarLink to="/admin/reports" icon="📈" active={location.pathname === '/admin/reports'}>
-              Reports
-            </SidebarLink>
-            <SidebarLink to="/admin/payments" icon="💰" active={location.pathname === '/admin/payments'}>
-              Payments
-            </SidebarLink>
-            <SidebarLink to="/admin/announcements" icon="📢" active={location.pathname === '/admin/announcements'}>
-              Announcements
-            </SidebarLink>
-            <SidebarLink to="/admin/settings" icon="⚙️" active={location.pathname === '/admin/settings'}>
+        {/* የሜኑ ዝርዝር */}
+        <nav className="flex-1 overflow-y-auto py-6 px-4 space-y-2">
+          <p className="px-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Main Menu</p>
+          
+          <SidebarLink to="/admin" icon={<DashboardIcon />} active={location.pathname === '/admin'} onClick={() => setIsMobileMenuOpen(false)}>
+            Dashboard
+          </SidebarLink>
+          <SidebarLink to="/admin/users" icon={<UsersIcon />} active={location.pathname === '/admin/users'} onClick={() => setIsMobileMenuOpen(false)}>
+            Manage Users
+          </SidebarLink>
+          <SidebarLink to="/admin/classes" icon={<ClassesIcon />} active={location.pathname === '/admin/classes'} onClick={() => setIsMobileMenuOpen(false)}>
+            Manage Classes
+          </SidebarLink>
+          <SidebarLink to="/admin/reports" icon={<ReportsIcon />} active={location.pathname === '/admin/reports'} onClick={() => setIsMobileMenuOpen(false)}>
+            Reports
+          </SidebarLink>
+          <SidebarLink to="/admin/payments" icon={<PaymentsIcon />} active={location.pathname === '/admin/payments'} onClick={() => setIsMobileMenuOpen(false)}>
+            Payments
+          </SidebarLink>
+          <SidebarLink to="/admin/announcements" icon={<AnnouncementsIcon />} active={location.pathname === '/admin/announcements'} onClick={() => setIsMobileMenuOpen(false)}>
+            Announcements
+          </SidebarLink>
+
+          <div className="pt-6 mt-6 border-t border-slate-100">
+            <p className="px-2 text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Settings</p>
+            <SidebarLink to="/admin/settings" icon={<SettingsIcon />} active={location.pathname === '/admin/settings'} onClick={() => setIsMobileMenuOpen(false)}>
               Settings
             </SidebarLink>
           </div>
         </nav>
 
-        <div className="p-4 border-t">
-          <div className="text-xs text-gray-500 mb-2 truncate">{user?.email}</div>
-          <button
-            onClick={() => setShowPasswordModal(true)}
-            className="w-full text-sm bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded mb-2"
-          >
-            🔐 Change Password
-          </button>
-          <button
-            onClick={logout}
-            className="w-full text-sm bg-red-500 hover:bg-red-600 text-white py-2 rounded"
-          >
-            Logout
-          </button>
+        {/* የታችኛው የተጠቃሚ መረጃ እና Logout */}
+        <div className="p-4 border-t border-slate-100">
+          <div className="bg-slate-50 rounded-xl p-4 flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+              {user?.name?.charAt(0) || 'A'}
+            </div>
+            <div className="overflow-hidden">
+              <p className="text-sm font-semibold text-slate-800 truncate">{user?.name}</p>
+              <p className="text-xs text-slate-500 truncate">{user?.email}</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowPasswordModal(true)}
+              className="flex-1 text-xs bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 py-2 rounded-lg transition font-medium"
+            >
+              Password
+            </button>
+            <button
+              onClick={logout}
+              className="flex-1 text-xs bg-red-50 hover:bg-red-100 text-red-600 py-2 rounded-lg transition font-medium"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </aside>
 
       {/* 3. Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="bg-white shadow-sm border-b px-4 md:px-6 py-4 flex items-center justify-between">
+      <main className="flex-1 flex flex-col min-w-0">
+        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-30 h-20 px-6 md:px-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            {/* ሞባይል ላይ ብቻ የሚታየው የሜኑ አዶ (☰) */}
             <button 
               onClick={() => setIsMobileMenuOpen(true)}
-              className="md:hidden text-gray-600 hover:text-indigo-600 focus:outline-none"
+              className="md:hidden text-slate-600 hover:text-indigo-600 p-2 rounded-lg hover:bg-slate-100 transition"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
             <div>
-              <h1 className="text-lg md:text-xl font-bold text-gray-800">Welcome, {user?.name}</h1>
-              <p className="text-xs md:text-sm text-gray-500 hidden sm:block">Integrated School Community Management</p>
+              <h1 className="text-xl font-bold text-slate-800">Admin Dashboard</h1>
+              <p className="text-sm text-slate-500 hidden sm:block">Welcome back, {user?.name}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full hidden sm:block">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
             </div>
           </div>
         </header>
         
-        <div className="p-4 md:p-6 flex-1 overflow-auto">
+        <div className="p-6 md:p-8 flex-1 overflow-auto">
           <Outlet />
         </div>
       </main>
@@ -122,16 +136,50 @@ export default function AdminDashboard() {
   );
 }
 
-function SidebarLink({ to, icon, children, active }) {
+// --- የሜኑ አማራጭ (Sidebar Link) ኮምፖኔንት ---
+function SidebarLink({ to, icon, children, active, onClick }) {
   return (
     <Link
       to={to}
-      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm mb-1 ${
-        active ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-700 hover:bg-gray-50'
-      }`}
+      onClick={onClick}
+      className={`
+        group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
+        ${active 
+          ? 'bg-indigo-50 text-indigo-700 shadow-sm border border-indigo-100' 
+          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 border border-transparent'
+        }
+      `}
     >
-      <span>{icon}</span>
+      <div className={`transition-colors ${active ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600'}`}>
+        {icon}
+      </div>
       <span>{children}</span>
+      {active && (
+        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-600"></div>
+      )}
     </Link>
   );
+}
+
+// --- የ SVG አዶዎች (Icons) ---
+function DashboardIcon() {
+  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>;
+}
+function UsersIcon() {
+  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>;
+}
+function ClassesIcon() {
+  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>;
+}
+function ReportsIcon() {
+  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>;
+}
+function PaymentsIcon() {
+  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>;
+}
+function AnnouncementsIcon() {
+  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg>;
+}
+function SettingsIcon() {
+  return <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>;
 }
