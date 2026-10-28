@@ -13,14 +13,20 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      const res = await API.post('/auth/forgot-password', { email });
+      // Timeout ጨምሯል (10 ሰከንድ)
+      const res = await API.post('/auth/forgot-password', { email }, { timeout: 10000 });
+      
       setMessage({ type: 'success', text: res.data.message });
       setEmail('');
     } catch (err) {
-      setMessage({
-        type: 'error',
-        text: err.response?.data?.message || 'Failed to send email'
-      });
+      if (err.code === 'ECONNABORTED') {
+        setMessage({ type: 'error', text: 'Request timed out. Please try again.' });
+      } else {
+        setMessage({
+          type: 'error',
+          text: err.response?.data?.message || 'Failed to send email'
+        });
+      }
     } finally {
       setLoading(false);
     }
