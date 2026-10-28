@@ -14,7 +14,7 @@ export default function ForgotPassword() {
 
     try {
       // Timeout ጨምሯል (10 ሰከንድ)
-      const res = await API.post('/auth/forgot-password', { email }, { timeout: 10000 });
+      const res = await API.post('/auth/forgot-password', { email }, { timeout: 30000 });
       
       setMessage({ type: 'success', text: res.data.message });
       setEmail('');
