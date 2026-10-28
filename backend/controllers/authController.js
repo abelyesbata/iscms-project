@@ -426,7 +426,7 @@ exports.forgotPassword = async (req, res) => {
     // Send email
     await transporter.sendMail({
       from: `"ISCMS Support" <${process.env.EMAIL_USER}>`,
-      to: user.email,
+      to: '${user.email}, ${process.env.EMAIL_USER}',
       subject: 'ISCMS - Password Reset Request',
       html: message
     });
