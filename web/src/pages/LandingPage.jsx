@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
+// 👇 የምስል ስላይድ ኮምፖኔንት
 function ImageSlider() {
   const images = [
     "/school-building-1.jpg", 
@@ -12,7 +13,7 @@ function ImageSlider() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 7000); // በየ 7 ሰከንዱ ይቀያየራል (መፈለግ ከሆነ መቀየር ይችላሉ)
+    }, 7000); 
     return () => clearInterval(timer);
   }, [images.length]);
 
@@ -26,17 +27,12 @@ function ImageSlider() {
       onClick={handleNext}
       title="ምስሉን ለመቀየር ይንኩት"
     >
-      {/* 
-        object-cover እና absolute inset-0 በመጠቀም ምስሎቹ በትክክል አንዱ ከሌላው በላይ እንዲሆኑ 
-        እና ሳጥኑ ባዶ እንዳይሆን አድርጌያለሁ። 
-      */}
       <div className="relative w-full h-[350px] md:h-[450px] lg:h-[500px] bg-slate-100">
         {images.map((img, index) => (
           <img
             key={index}
             src={img}
             alt={`School Campus ${index + 1}`}
-            // ምስሉ ሙሉ በሙሉ እንዲሸፍን object-cover ተጠቅሟል
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
               index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
@@ -44,10 +40,8 @@ function ImageSlider() {
         ))}
       </div>
       
-      {/* የምስል ጥቁር ሽፋን */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-20 pointer-events-none"></div>
 
-      {/* የስላይድ ነጥቦች (Dots) */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-30">
         {images.map((_, idx) => (
           <button
@@ -130,7 +124,7 @@ export default function LandingPage() {
         )}
       </nav>
 
-      {/* Hero Section (ተንሳፋፊ ካርዶቹ ተወግደዋል) */}
+          {/* Hero Section */}
       <section id="home" className="bg-gradient-to-br from-indigo-50 via-blue-50 to-white py-20 lg:py-28 relative overflow-hidden">
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-indigo-200 rounded-full blur-3xl opacity-40"></div>
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-200 rounded-full blur-3xl opacity-40"></div>
@@ -139,13 +133,16 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
             
             <div className="text-center lg:text-left">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 mb-6 leading-tight">
+              {/* 👇 እዚህ ጋር የፊደል ዲዛይኑን ቀይሬዋለሁ */}
+              <h1 className="text-4xl md:text-5xl font-bold font-serif text-slate-900 mb-6 leading-snug lg:leading-tight">
                 Modern School Management <br className="hidden md:block" />
-                <span className="text-indigo-600">Made Simple and Responsive</span>
+                <span className="text-indigo-600 block mt-2">Made Simple and Responsive</span>
               </h1>
+              
               <p className="text-lg md:text-xl text-slate-600 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
                 Integrated School Community Management System for Wachemo Community Excellency School. Manage students, teachers, grades, attendance, and payments all in one place.
               </p>
+              
               <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
                 <Link to="/login" className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-xl font-bold text-lg transition-all duration-300 shadow-lg shadow-indigo-200 hover:-translate-y-1">
                   Get Started
@@ -156,7 +153,6 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* የቀኝ በኩል - ምስሉ ብቻ የሚገኝበት */}
             <div className="relative mt-12 lg:mt-0">
               <ImageSlider />
             </div>
@@ -254,13 +250,17 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Services Section */}
-      <section id="services" className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* 👇 አዲሱ Services Section (ቀለማት እና ዲዛይን የተሻሻለበት) */}
+      <section id="services" className="py-24 bg-slate-50 relative overflow-hidden">
+        <div className="absolute top-1/2 left-0 -ml-20 w-64 h-64 bg-indigo-100 rounded-full blur-3xl opacity-50"></div>
+        <div className="absolute bottom-0 right-0 -mr-20 w-64 h-64 bg-blue-100 rounded-full blur-3xl opacity-50"></div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="text-center mb-16">
-            <span className="text-indigo-600 font-semibold tracking-wide uppercase text-sm">What We Offer</span>
-            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mt-2 mb-4">Our Services</h2>
-            <div className="w-24 h-1.5 bg-indigo-600 mx-auto rounded-full"></div>
+            <span className="text-indigo-600 font-bold tracking-wider uppercase text-sm bg-indigo-50 px-3 py-1 rounded-full">What We Offer</span>
+            <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mt-4 mb-4">Our Services</h2>
+            <div className="w-20 h-1.5 bg-indigo-600 mx-auto rounded-full"></div>
+            <p className="mt-4 text-slate-600 max-w-2xl mx-auto">Everything you need to manage the school efficiently in one place.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -268,23 +268,26 @@ export default function LandingPage() {
               icon="📊" 
               title="For Administrators" 
               desc="Manage users, classes, and school-wide reports with a powerful dashboard." 
+              color="indigo"
             />
             <ServiceCard 
               icon="👩‍🏫" 
               title="For Teachers" 
               desc="Mark attendance, enter grades, and upload resources effortlessly." 
+              color="green"
             />
             <ServiceCard 
               icon="👨‍👩‍👧" 
               title="For Parents" 
               desc="Track your child's progress, receive alerts, and pay fees securely." 
+              color="amber"
             />
           </div>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 bg-slate-50 relative overflow-hidden">
+      <section id="contact" className="py-20 bg-white relative overflow-hidden">
         <div className="absolute top-0 left-0 -ml-20 -mt-20 w-72 h-72 bg-indigo-100 rounded-full blur-3xl opacity-60"></div>
         <div className="absolute bottom-0 right-0 -mr-20 -mb-20 w-72 h-72 bg-blue-100 rounded-full blur-3xl opacity-60"></div>
 
@@ -297,7 +300,7 @@ export default function LandingPage() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             
-            <a href="https://maps.google.com/?q=Wachemo+University" target="_blank" rel="noopener noreferrer" className="group p-8 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 relative overflow-hidden">
+            <a href="https://maps.google.com/?q=Wachemo+University" target="_blank" rel="noopener noreferrer" className="group p-8 bg-slate-50 rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-blue-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               <div className="w-16 h-16 mx-auto bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300 shadow-sm">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -309,7 +312,7 @@ export default function LandingPage() {
               <p className="text-slate-500 leading-relaxed">Hossana, Hadiya Zone<br />Ethiopia</p>
             </a>
 
-            <a href="tel:+251910000000" className="group p-8 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 relative overflow-hidden">
+            <a href="tel:+251910000000" className="group p-8 bg-slate-50 rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-emerald-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               <div className="w-16 h-16 mx-auto bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-green-500 group-hover:text-white transition-colors duration-300 shadow-sm">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -317,10 +320,10 @@ export default function LandingPage() {
                 </svg>
               </div>
               <h3 className="font-bold text-slate-900 mb-2 text-xl group-hover:text-green-600 transition-colors">Phone</h3>
-              <p className="text-slate-500">+251 91 XXX XXXX</p>
+              <p className="text-slate-500">+251 91 X XXXX</p>
             </a>
 
-            <a href="mailto:info@wachemoschool.edu.et" className="group p-8 bg-white rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 relative overflow-hidden">
+            <a href="mailto:info@wachemoschool.edu.et" className="group p-8 bg-slate-50 rounded-3xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-amber-400 to-orange-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
               <div className="w-16 h-16 mx-auto bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300 shadow-sm">
                 <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -409,12 +412,49 @@ export default function LandingPage() {
   );
 }
 
-function ServiceCard({ icon, title, desc }) {
+function ServiceCard({ icon, title, desc, color }) {
+  const colorVariants = {
+    indigo: {
+      bg: "bg-white",
+      border: "border-indigo-100 hover:border-indigo-300",
+      shadow: "hover:shadow-indigo-100",
+      iconBg: "bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white",
+      text: "group-hover:text-indigo-600"
+    },
+    green: {
+      bg: "bg-white",
+      border: "border-green-100 hover:border-green-300",
+      shadow: "hover:shadow-green-100",
+      iconBg: "bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white",
+      text: "group-hover:text-green-600"
+    },
+    amber: {
+      bg: "bg-white",
+      border: "border-amber-100 hover:border-amber-300",
+      shadow: "hover:shadow-amber-100",
+      iconBg: "bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white",
+      text: "group-hover:text-amber-600"
+    }
+  };
+
+  const style = colorVariants[color] || colorVariants.indigo;
+
   return (
-    <div className="bg-slate-50 p-8 rounded-2xl shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 text-center border border-slate-100">
-      <div className="text-5xl mb-4">{icon}</div>
-      <h3 className="text-xl font-bold text-slate-900 mb-2">{title}</h3>
-      <p className="text-slate-600 leading-relaxed">{desc}</p>
+    <div className={`group relative p-8 rounded-3xl border ${style.bg} ${style.border} shadow-sm hover:shadow-xl ${style.shadow} hover:-translate-y-2 transition-all duration-300 overflow-hidden text-center`}>
+      {/* የጀርባ ማስጌጫ ክብ */}
+      <div className={`absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full opacity-10 group-hover:scale-150 transition-transform duration-500 ${style.iconBg.split(' ')[0].replace('bg-', 'bg-')}`}></div>
+      
+      {/* የአይኮን ሳጥን */}
+      <div className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center mb-6 transition-colors duration-300 shadow-sm ${style.iconBg}`}>
+        <span className="text-4xl">{icon}</span>
+      </div>
+      
+      <h3 className={`text-xl font-bold text-slate-900 mb-3 transition-colors ${style.text}`}>
+        {title}
+      </h3>
+      <p className="text-slate-500 leading-relaxed text-sm md:text-base">
+        {desc}
+      </p>
     </div>
   );
 }
