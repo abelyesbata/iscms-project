@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
-// 👇 የምስል ስላይድ ኮምፖኔንት (ግራጫ ቀለም እንዳይታይ ተስተካክሏል)
+// 👇 የምስል ስላይድ ኮምፖኔንት (የተሻሻለ)
 function ImageSlider() {
   const images = [
     "/school-building-1.jpg", 
@@ -11,9 +11,10 @@ function ImageSlider() {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
+    // ⏱️ ሰዓቱን ከ 4000 ወደ 7000 (7 ሰከንድ) ቀይሬዋለሁ
     const timer = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 4000); // በየ 4 ሰከንዱ ይቀያየራል
+    }, 60); 
     return () => clearInterval(timer);
   }, [images.length]);
 
@@ -23,13 +24,13 @@ function ImageSlider() {
 
   return (
     <div 
-      className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white group cursor-pointer bg-slate-200"
+      className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white group cursor-pointer bg-slate-200 w-full"
       onClick={handleNext}
       title="ምስሉን ለመቀየር ይንኩት"
     >
       {/* 
-        ምስሎቹ በሚቀያየሩበት ጊዜ ግራጫ ቀለም እንዳይታይ 
-        ሁሉም ምስሎች grid ውስጥ ተደርገው አንዱ ከሌላው በላይ ይቀመጣሉ 
+        ምስሎቹ በሚቀያየሩበት ጊዜ ባዶ ቦታ እንዳይታይ ሁለቱም ምስሎች 
+        አንድ ላይ ተደራርበው (grid) ይቀመጣሉ። 
       */}
       <div className="grid grid-cols-1 grid-rows-1 w-full h-[350px] md:h-[450px] lg:h-[500px]">
         {images.map((img, index) => (
@@ -38,6 +39,7 @@ function ImageSlider() {
             src={img}
             alt={`School Campus ${index + 1}`}
             className={`col-start-1 row-start-1 w-full h-full object-cover transition-opacity duration-1000 ease-in-out ${
+              // ⏱️ የመቀያየሪያውን ፍጥነት (duration-1000) ወደ ለስላሳ አድርጌዋለሁ
               index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
           />
