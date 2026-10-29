@@ -14,6 +14,7 @@ import Reports from './pages/admin/Reports';
 import Payments from './pages/admin/Payments';
 import Announcements from './pages/admin/Announcements';
 import Settings from './pages/admin/Settings';
+import StudentsList from './pages/admin/StudentsList';
 import TeacherDashboard from './pages/TeacherDashboard';
 import TeacherOverview from './pages/teacher/TeacherOverview';
 import MarkAttendance from './pages/teacher/MarkAttendance';
@@ -65,6 +66,7 @@ export default function App() {
             <Route path="payments" element={<Payments />} />
             <Route path="announcements" element={<Announcements />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="students" element={<StudentsList />} />
           </Route>
 
           {/* Teacher routes */}
