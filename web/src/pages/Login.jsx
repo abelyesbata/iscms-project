@@ -19,7 +19,9 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await API.post('/auth/login', { email, password });
+      // 👇 የ 10 ሰከንድ የጊዜ ገደብ (timeout) ጨምሬያለሁ
+      const res = await API.post('/auth/login', { email, password }, { timeout: 10000 });
+      
       login(res.data.user, res.data.token);
 
       // Redirect based on role
@@ -30,9 +32,20 @@ export default function Login() {
       else if (role === 'parent') navigate('/parent');
       else if (role === 'student') navigate('/student');
       else navigate('/');
+      
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      console.error("Login Error:", err); // ለማወቅ በኮንሶል ያሳያል
+      
+      // 👇 የተሻሻለ የስህተት መልእክት
+      if (err.code === 'ECONNABORTED') {
+        setError('ጥያቄው በጣም ረጅም ጊዜ ወስዷል። እባክህ የኢንተርኔት ግንኙነትህን አረጋግጥ።');
+      } else if (err.message === 'Network Error') {
+        setError('የባክኤንድ ሰርቨሩ አልተገኘም። ሰርቨሩ መስራቱን አረጋግጥ።');
+      } else {
+        setError(err.response?.data?.message || 'የሎጊን ሙከራ አልተሳካም። እባክህ እንደገና ሞክር።');
+      }
     } finally {
+      // ስህተት ቢፈጠርም ሆነ ስኬታማ ቢሆን ሎዲንጉ ይቆማል
       setLoading(false);
     }
   };
