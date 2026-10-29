@@ -1,19 +1,22 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import API from '../../services/api'; // የ API ፋይልህ ትክክለኛ መንገድ አረጋግጥ
 
 export default function StudentsList() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     // ተማሪዎችን ከባክኤንድ ማምጣት
     const fetchStudents = async () => {
       try {
-        // እባክህ ይህንን መንገድ በትክክለኛው የባክኤንድ ሮውትህ (Endpoint) ቀይረው
+        // 👇 የኤፒአይ አድራሻውን አስተካክያለሁ
         const res = await API.get('/users?role=student'); 
         setStudents(res.data);
       } catch (err) {
         console.error("Error fetching students:", err);
+        setError(err.response?.data?.message || 'ተማሪዎችን ማምጣት አልተቻለም። እባክህ የኤፒአይ አድራሻውን አረጋግጥ።');
       } finally {
         setLoading(false);
       }
@@ -40,6 +43,13 @@ export default function StudentsList() {
         </div>
       </div>
 
+      {/* ስህተት ካለ እዚህ ያሳያል */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6">
+          {error}
+        </div>
+      )}
+
       {/* Table */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="overflow-x-auto">
@@ -50,6 +60,7 @@ export default function StudentsList() {
                 <th className="p-4 font-semibold">ኢሜይል (Email)</th>
                 <th className="p-4 font-semibold">ክፍል (Class)</th>
                 <th className="p-4 font-semibold">ሁኔታ (Status)</th>
+                <th className="p-4 font-semibold text-right">ተግባር (Action)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -71,11 +82,17 @@ export default function StudentsList() {
                         ንቁ (Active)
                       </span>
                     </td>
+                    <td className="p-4 text-right">
+                      {/* 👇 ይህ ሊንክ Link import ስህተቱን ያስወግዳል */}
+                      <Link to={`/admin/students/${student._id}`} className="text-indigo-600 hover:text-indigo-800 font-medium text-sm">
+                        ዝርዝር ይመልከቱ
+                      </Link>
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4" className="p-8 text-center text-slate-500">
+                  <td colSpan="5" className="p-8 text-center text-slate-500">
                     ምንም ተማሪ አልተገኘም።
                   </td>
                 </tr>
