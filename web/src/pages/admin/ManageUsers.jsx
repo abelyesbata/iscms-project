@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import API from '../../services/api';
+import { useLanguage } from '../../context/useLanguage'; // 👈 ተጨምሯል
 
 export default function ManageUsers() {
   const [users, setUsers] = useState([]);
@@ -8,6 +9,11 @@ export default function ManageUsers() {
   const [showForm, setShowForm] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [message, setMessage] = useState(null);
+  
+  // 👇 ንቁ የሆነውን ሮል ለመከታተል (Default: student)
+  const [activeTab, setActiveTab] = useState('student');
+
+  const { t } = useLanguage(); // 👈 ተጨምሯል
 
   const [form, setForm] = useState({
     fullName: '',
@@ -16,7 +22,6 @@ export default function ManageUsers() {
     role: 'student'
   });
 
-  // Run ONCE on mount
   useEffect(() => {
     let cancelled = false;
 
@@ -41,7 +46,6 @@ export default function ManageUsers() {
     };
   }, []);
 
-  // Refresh helper for CRUD actions
   const refreshUsers = async () => {
     try {
       const res = await API.get('/auth/users');
@@ -53,7 +57,7 @@ export default function ManageUsers() {
 
   const openCreateForm = () => {
     setEditingUser(null);
-    setForm({ fullName: '', email: '', password: '', role: 'student' });
+    setForm({ fullName: '', email: '', password: '', role: activeTab }); // 👈 አሁን ባለው Tab መሰረት ይፈጥራል
     setShowForm(true);
     setMessage(null);
   };
@@ -112,22 +116,71 @@ export default function ManageUsers() {
     }
   };
 
-  const filtered = users.filter(
-    (u) =>
+  // 👇 በሮል እና በፍለጋ መሰረት ማጣራት
+  const filtered = users.filter((u) => {
+    const matchesRole = u.role === activeTab;
+    const matchesSearch = 
       u.fullName?.toLowerCase().includes(filter.toLowerCase()) ||
-      u.email?.toLowerCase().includes(filter.toLowerCase()) ||
-      u.role?.toLowerCase().includes(filter.toLowerCase())
-  );
+      u.email?.toLowerCase().includes(filter.toLowerCase());
+    return matchesRole && matchesSearch;
+  });
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Manage Users</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">{t('manageUsers')}</h1>
+          <p className="text-sm text-slate-500">ተጠቃሚዎችን በሮል መሰረት እዚህ ማስተዳደር ይችላሉ።</p>
+        </div>
         <button
           onClick={openCreateForm}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition"
         >
-          + Add User
+          + አዲስ ተጠቃሚ ጨምር
+        </button>
+      </div>
+
+      {/* 👇 የሮል መለያያ Tabs */}
+      <div className="flex space-x-2 border-b border-slate-200 mb-6 overflow-x-auto pb-2">
+        <button
+          onClick={() => setActiveTab('student')}
+          className={`px-4 py-2 rounded-t-lg font-medium transition-colors whitespace-nowrap ${
+            activeTab === 'student' 
+              ? 'bg-indigo-50 text-indigo-700 border-b-2 border-indigo-600' 
+              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+          }`}
+        >
+          🎓 Students
+        </button>
+        <button
+          onClick={() => setActiveTab('teacher')}
+          className={`px-4 py-2 rounded-t-lg font-medium transition-colors whitespace-nowrap ${
+            activeTab === 'teacher' 
+              ? 'bg-purple-50 text-purple-700 border-b-2 border-purple-600' 
+              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+          }`}
+        >
+          👩‍🏫 Teachers
+        </button>
+        <button
+          onClick={() => setActiveTab('parent')}
+          className={`px-4 py-2 rounded-t-lg font-medium transition-colors whitespace-nowrap ${
+            activeTab === 'parent' 
+              ? 'bg-amber-50 text-amber-700 border-b-2 border-amber-600' 
+              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+          }`}
+        >
+          👨‍👩‍👧 Parents
+        </button>
+        <button
+          onClick={() => setActiveTab('registrar')}
+          className={`px-4 py-2 rounded-t-lg font-medium transition-colors whitespace-nowrap ${
+            activeTab === 'registrar' 
+              ? 'bg-teal-50 text-teal-700 border-b-2 border-teal-600' 
+              : 'text-slate-500 hover:text-slate-800 hover:bg-slate-50'
+          }`}
+        >
+          📝 Registrar
         </button>
       </div>
 
@@ -146,7 +199,7 @@ export default function ManageUsers() {
       <div className="mb-4">
         <input
           type="text"
-          placeholder="Search by name, email, or role..."
+          placeholder={t('searchUser') || "Search by name or email..."}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
@@ -154,39 +207,51 @@ export default function ManageUsers() {
       </div>
 
       {loading ? (
-        <div className="text-center py-8 text-gray-500">Loading users...</div>
+        <div className="text-center py-8 text-gray-500">{t('loading')}</div>
       ) : (
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50 border-b">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('name')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('email')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('role')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('status')}</th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">{t('action')}</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-4 py-8 text-center text-gray-500">
-                    No users found.
+                    በዚህ ምድብ ውስጥ ምንም ተጠቃሚ አልተገኘም።
                   </td>
                 </tr>
               ) : (
                 filtered.map((u) => (
                   <tr key={u._id} className="border-b hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm font-medium">{u.fullName}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs ${
+                          u.role === 'student' ? 'bg-indigo-500' :
+                          u.role === 'teacher' ? 'bg-purple-500' :
+                          u.role === 'parent' ? 'bg-amber-500' :
+                          'bg-teal-500'
+                        }`}>
+                          {u.fullName ? u.fullName.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                        <span className="text-sm font-medium">{u.fullName}</span>
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-sm">{u.email}</td>
                     <td className="px-4 py-3">
                       <RoleBadge role={u.role} />
                     </td>
                     <td className="px-4 py-3 text-sm">
                       {u.isActive ? (
-                        <span className="text-green-600">● Active</span>
+                        <span className="text-green-600 text-xs font-medium">● ንቁ</span>
                       ) : (
-                        <span className="text-gray-400">● Inactive</span>
+                        <span className="text-gray-400 text-xs font-medium">● ያልተንቀሳቀሰ</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-sm">
@@ -211,24 +276,25 @@ export default function ManageUsers() {
         </div>
       )}
 
+      {/* Create / Edit Modal */}
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold text-gray-800">
-                {editingUser ? 'Edit User' : 'Create User'}
+                {editingUser ? 'ተጠቃሚ አስተካክል' : 'አዲስ ተጠቃሚ ፍጠር'}
               </h2>
               <button
                 onClick={() => setShowForm(false)}
                 className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
               >
-                ×
+                &times;
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('name')}</label>
                 <input
                   required
                   type="text"
@@ -239,7 +305,7 @@ export default function ManageUsers() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('email')}</label>
                 <input
                   required
                   type="email"
@@ -251,7 +317,7 @@ export default function ManageUsers() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password {editingUser && '(leave blank to keep current)'}
+                  ፓስወርድ {editingUser && '(ባዶ ከሆነ አይቀየርም)'}
                 </label>
                 <input
                   type="password"
@@ -263,17 +329,17 @@ export default function ManageUsers() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('role')}</label>
                 <select
                   value={form.role}
                   onChange={(e) => setForm({ ...form, role: e.target.value })}
                   className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
                 >
-                  <option value="student">Student</option>
-                  <option value="teacher">Teacher</option>
-                  <option value="parent">Parent</option>
-                  <option value="registrar">Registrar</option>
-                  <option value="admin">Admin</option>
+                  <option value="student"> ተማሪ (Student)</option>
+                  <option value="teacher"> መምህር (Teacher)</option>
+                  <option value="parent"> ወላጅ (Parent)</option>
+                  <option value="registrar"> ሬጅስትራር (Registrar)</option>
+                  <option value="admin"> አድሚን (Admin)</option>
                 </select>
               </div>
 
@@ -282,14 +348,14 @@ export default function ManageUsers() {
                   type="submit"
                   className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg"
                 >
-                  {editingUser ? 'Update' : 'Create'}
+                  {editingUser ? 'አስቀምጥ' : 'ፍጠር'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
                   className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
                 >
-                  Cancel
+                  ሰርዝ
                 </button>
               </div>
             </form>
@@ -300,6 +366,7 @@ export default function ManageUsers() {
   );
 }
 
+// 👇 የሮል ባጅ (Role Badge)
 function RoleBadge({ role }) {
   const colors = {
     admin: 'bg-purple-100 text-purple-800',
@@ -309,9 +376,17 @@ function RoleBadge({ role }) {
     registrar: 'bg-indigo-100 text-indigo-800'
   };
 
+  const labels = {
+    admin: 'Admin',
+    teacher: 'Teacher',
+    student: 'Student',
+    parent: 'Parent',
+    registrar: 'Registrar'
+  };
+
   return (
-    <span className={`px-2 py-1 text-xs rounded ${colors[role] || 'bg-gray-100 text-gray-800'}`}>
-      {role}
+    <span className={`px-2 py-1 text-xs font-medium rounded-full ${colors[role] || 'bg-gray-100 text-gray-800'}`}>
+      {labels[role] || role}
     </span>
   );
 }

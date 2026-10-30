@@ -21,6 +21,7 @@ import TeacherProfile from './pages/admin/TeacherProfile';
 import TeacherDashboard from './pages/TeacherDashboard';
 import TeacherOverview from './pages/teacher/TeacherOverview';
 import MarkAttendance from './pages/teacher/MarkAttendance';
+import AttendanceReport from './pages/admin/AttendanceReport';
 import EnterGrades from './pages/teacher/EnterGrades';
 import UploadResources from './pages/teacher/UploadResources';
 import ClassAnnouncements from './pages/teacher/ClassAnnouncements';
@@ -73,6 +74,7 @@ export default function App() {
             <Route path="/admin/students/:id" element={<StudentProfile />} />
             <Route path="teachers" element={<TeachersList />} />
             <Route path="teachers/:id" element={<TeacherProfile />} />
+            <Route path="attendance" element={<AttendanceReport />} />
           </Route>
 
           {/* Teacher routes */}
