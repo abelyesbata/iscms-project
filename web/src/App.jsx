@@ -16,6 +16,8 @@ import Announcements from './pages/admin/Announcements';
 import Settings from './pages/admin/Settings';
 import StudentsList from './pages/admin/StudentsList';
 import StudentProfile from './pages/admin/StudentProfile';
+import TeachersList from './pages/admin/TeachersList';
+import TeacherProfile from './pages/admin/TeacherProfile';
 import TeacherDashboard from './pages/TeacherDashboard';
 import TeacherOverview from './pages/teacher/TeacherOverview';
 import MarkAttendance from './pages/teacher/MarkAttendance';
@@ -69,6 +71,8 @@ export default function App() {
             <Route path="settings" element={<Settings />} />
             <Route path="students" element={<StudentsList />} />
             <Route path="/admin/students/:id" element={<StudentProfile />} />
+            <Route path="teachers" element={<TeachersList />} />
+            <Route path="teachers/:id" element={<TeacherProfile />} />
           </Route>
 
           {/* Teacher routes */}
