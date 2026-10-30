@@ -51,7 +51,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-         <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
 
           {/* Admin routes */}
           <Route
@@ -137,7 +137,8 @@ export default function App() {
             <Route path="payments" element={<MakePayment />} />
             <Route path="history" element={<PaymentHistory />} />
           </Route>
-          {/* Payment Callback Route (Chapa Redirects Here) */}
+          
+          {/* Payment Callback Route */}
           <Route path="/payment/callback" element={<PaymentCallback />} />
           <Route path="/payment/success" element={<PaymentCallback />} />
 
