@@ -111,7 +111,9 @@ export default function AdminDashboard() {
             </button>
             <div>
               <h1 className="text-xl font-bold text-slate-800">{t('dashboard')}</h1>
-              <p className="text-sm text-slate-500 hidden sm:block">Welcome back, {user?.name}</p>
+              <p className="text-sm text-slate-500 hidden sm:block">
+                  {t('welcomeBack')}, {user?.name}
+                </p>
             </div>
           </div>
           
